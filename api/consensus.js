@@ -1,11 +1,5 @@
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "*");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
 
   const query = req.query.query;
 
@@ -15,7 +9,7 @@ export default async function handler(req, res) {
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${process.env.CONSENSUS_API_KEY}`,
+        "x-api-key": process.env.CONSENSUS_API_KEY,
       },
     });
 
@@ -23,7 +17,6 @@ export default async function handler(req, res) {
     
     return res.status(200).json({
       status: response.status,
-      sentKey: `Bearer ${process.env.CONSENSUS_API_KEY?.substring(0, 8)}...`,
       body: text
     });
 
