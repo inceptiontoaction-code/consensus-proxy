@@ -1,24 +1,31 @@
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   const query = req.query.query;
 
-  try {
-    const url = `https://api.consensus.app/v1/quick_search?query=${encodeURIComponent(query)}`;
-    
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "x-api-key": process.env.CONSENSUS_API_KEY,
-      },
-    });
+  if (!query) {
+    return res.status(400).json({ error: "query parameter is required" });
+  }
 
-    const text = await response.text();
-    
-    return res.status(200).json({
-      status: response.status,
-      body: text
-    });
+  try {
+    const response = await fetch(
+      `https://api.consensus.app/v1/quick_search?query=${encodeURIComponent(query)}`,
+      {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.CONSENSUS_API_KEY,
+        },
+      }
+    );
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
 
   } catch (err) {
     return res.status(500).json({ error: err.message });
